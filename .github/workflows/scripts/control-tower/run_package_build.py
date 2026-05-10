@@ -6,9 +6,11 @@ Flow:
        component whose inputs changed needs a rebuild, regardless of whether
        its ``sourcesChange`` flag is set.
     3. POST ``/api/Scenario/package`` with the build request.
-    4. Poll briefly (default 5 min) until the job leaves ``Queued`` or hits a
-       terminal failure. The goal is to confirm the job was accepted, not to
-       wait for the full build — that can take hours.
+    4. Poll briefly (default 5 min) until the job reaches a terminal state
+       (success or failure) or the local timeout expires. The goal is to
+       catch jobs that fail immediately on submission, not to wait for the
+       full build -- a non-terminal status at timeout is treated as
+       acceptance and the build continues async.
     5. Exit 0 if the job started (or completed). Exit 1 only on submission
        failure or immediate terminal failure.
 """
@@ -82,6 +84,12 @@ def _parse_args() -> argparse.Namespace:
         help="Base URL of the Control Tower service",
     )
     parser.add_argument(
+        "--build-reason",
+        required=True,
+        help="ADO build reason (PullRequest, IndividualCI, ...). Used for the "
+        "local skip guard -- package builds are not submitted for PR triggers.",
+    )
+    parser.add_argument(
         "--changed-components-file",
         required=True,
         type=Path,
@@ -129,11 +137,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--poll-timeout-seconds",
         type=int,
-        default=300,
+        default=600,
         help=(
-            "Maximum time to wait for the job to leave Queued status "
-            "(default: 300 = 5 min). This is NOT the build timeout — we just "
-            "want to confirm the job was accepted."
+            "Maximum time to wait for the job to reach a terminal state "
+            "(default: 600 = 10 min). This is NOT the build timeout -- we "
+            "just want to catch jobs that fail immediately on submission. "
+            "A non-terminal status at timeout is treated as acceptance."
         ),
     )
     return parser.parse_args()
@@ -153,8 +162,15 @@ def main() -> None:
 
     base_url = args.api_base_url.rstrip("/")
 
+    if args.build_reason == "PullRequest":
+        print(
+            "Skipping Control Tower call -- pull request triggers do not submit "
+            "package builds (unmerged code should not consume build capacity)."
+        )
+        return
+
     if not components:
-        print("No components need a rebuild — skipping package-build submission.")
+        print("No components need a rebuild -- skipping package-build submission.")
         return
 
     # ── Build payload ────────────────────────────────────────────────
@@ -163,6 +179,7 @@ def main() -> None:
         "packageTarget": args.package_target,
         "packages": components,
         "isScratchBuild": args.scratch_build,
+        "buildReason": args.build_reason,
     }
     if args.commit_sha is not None:
         payload["commitSha"] = args.commit_sha
@@ -212,7 +229,7 @@ def main() -> None:
         f"acceptance (not waiting for full build completion)..."
     )
     try:
-        final = ct.poll_until_terminal(
+        final, timed_out = ct.poll_until_terminal(
             session,
             base_url,
             credential,
@@ -226,12 +243,16 @@ def main() -> None:
         print(f"##[error]{exc}")
         sys.exit(1)
 
-    if final is None:
-        # Local timeout — job is still running, which is fine. We just wanted
-        # to confirm it didn't fail immediately.
+    if timed_out:
+        # We don't wait for full build completion -- the goal of this poll
+        # is just to surface a fast-failing job. A non-terminal status at
+        # the timeout is acceptance enough; the build continues async and
+        # is monitored in the Control Tower UI.
+        last_status = final.get("status", "Unknown")
         print(
-            f"Job {job_id} is still running after {args.poll_timeout_seconds}s "
-            f"— build accepted. Monitor progress in the Control Tower UI."
+            f"Job {job_id} still in non-terminal status '{last_status}' "
+            f"after {args.poll_timeout_seconds}s -- build accepted. "
+            f"Monitor progress in the Control Tower UI."
         )
         return
 
@@ -242,7 +263,7 @@ def main() -> None:
         print(f"Control Tower build job {job_id} completed successfully.")
         return
 
-    # Terminal failure — the job was accepted but failed immediately.
+    # Terminal failure -- the job was accepted but failed immediately.
     ct.report_failure(final)
     sys.exit(1)
 
