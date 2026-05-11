@@ -24,7 +24,7 @@ Requires:       %{name}-core-uname-r = %{KVERREL}
 Requires(post): kmod
 Requires(postun): kmod
 Conflicts:      nvidia-closed-kmod
-Conflicts:      nvidia-open
+Conflicts:      nvidia-kmod
 
 %description -n kmod-%{_kmod_name}-%{KVERREL}
 Open-source NVIDIA GPU kernel modules (driver version %{nvidia_open_version})
