@@ -4,7 +4,7 @@
 #
 # This template is OneBranch-agnostic: it declares the stages/jobs/steps that
 # do the actual work and exposes the OneBranch-coupled knobs as parameters.
-# The wrapper at .github/workflows/ado/control-tower-integration.yml is responsible for
+# The wrapper at .github/workflows/ado/sources-upload.yml is responsible for
 # choosing the OneBranch governed template variant (Official vs NonOfficial),
 # configuring its featureFlags, and supplying concrete values for the
 # parameters declared below.
