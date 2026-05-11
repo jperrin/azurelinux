@@ -2053,7 +2053,7 @@ components = [
     "python-pycomposefile",
     "python-pycparser",
     "python-pycurl",
-    "pyflakes", # in Fedora, the SRPM is named pyflakes (not python-pyflakes). It builds binary subpackages like python3-pyflakes.
+    "pyflakes",
     "python-pygit2",
     "python-PyGithub",
     "python-pygments",
