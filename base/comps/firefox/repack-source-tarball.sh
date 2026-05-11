@@ -3,7 +3,9 @@
 # Reproducibly rebuild firefox-<VERSION>.source.tar.xz with `ff-inst.exe`
 # removed. The Mozilla-provided test fixture
 #   firefox-<VERSION>/toolkit/components/mediasniffer/test/unit/data/ff-inst.exe
-# is flagged by ESRP signing as obfuscated content, blocking SRPM signing.
+# is an obfuscated Windows executable used only by Firefox's media-sniffer
+# unit tests. Obfuscated binaries in our source RPMs trip the distro's RPM
+# signing pipeline, which blocks the SRPM from being published.
 #
 # This script is fully deterministic: given the same upstream tarball it
 # always produces a byte-identical output (so the SHA-256 in the

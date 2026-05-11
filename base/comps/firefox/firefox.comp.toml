@@ -33,9 +33,10 @@ regex = '%global enable_mozilla_crashreporter 1'
 replacement = '%global enable_mozilla_crashreporter 0'
 
 # The upstream Mozilla source tarball ships an obfuscated Windows binary
-# (toolkit/components/mediasniffer/test/unit/data/ff-inst.exe) that ESRP's
-# scan service flags as "BlockingDetectionFound" (error 4001), preventing the
-# SRPM from being signed.
+# (toolkit/components/mediasniffer/test/unit/data/ff-inst.exe) used only by
+# Firefox's media-sniffer unit tests. Obfuscated executables in our source
+# RPMs trip the distro's RPM signing pipeline, which blocks the SRPM from
+# being published.
 #
 # We replace Source0 with a deterministically-repacked tarball that is
 # byte-identical to the upstream one except for the removal of ff-inst.exe.
@@ -47,7 +48,7 @@ replacement = '%global enable_mozilla_crashreporter 0'
 #   2. Re-run the script and copy the new SHA-256 into the source-files entry.
 #   3. Upload the new tarball to the lookaside cache (see script output).
 [[components.firefox.overlays]]
-description = "Use AZL-repacked source tarball with ff-inst.exe removed (ESRP obfuscated-content block)"
+description = "Use AZL-repacked source tarball with obfuscated ff-inst.exe removed (RPM signing block)"
 type = "spec-update-tag"
 tag = "Source0"
 value = "https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.azl.source.tar.xz"
