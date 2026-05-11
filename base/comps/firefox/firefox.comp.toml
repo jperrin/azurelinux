@@ -31,3 +31,31 @@ description = "Disable crash reporter to avoid GCC 15 breakpad compilation error
 type = "spec-search-replace"
 regex = '%global enable_mozilla_crashreporter 1'
 replacement = '%global enable_mozilla_crashreporter 0'
+
+# The upstream Mozilla source tarball ships an obfuscated Windows binary
+# (toolkit/components/mediasniffer/test/unit/data/ff-inst.exe) that ESRP's
+# scan service flags as "BlockingDetectionFound" (error 4001), preventing the
+# SRPM from being signed.
+#
+# We replace Source0 with a deterministically-repacked tarball that is
+# byte-identical to the upstream one except for the removal of ff-inst.exe.
+# The repack is produced by base/comps/firefox/repack-source-tarball.sh, which
+# is reproducible — re-running it always yields the same SHA-256.
+#
+# When bumping the firefox version:
+#   1. Update --version in repack-source-tarball.sh (and UPSTREAM_SHA512).
+#   2. Re-run the script and copy the new SHA-256 into the source-files entry.
+#   3. Upload the new tarball to the lookaside cache (see script output).
+[[components.firefox.overlays]]
+description = "Use AZL-repacked source tarball with ff-inst.exe removed (ESRP obfuscated-content block)"
+type = "spec-update-tag"
+tag = "Source0"
+value = "https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.azl.source.tar.xz"
+
+[[components.firefox.source-files]]
+filename = "firefox-148.0.azl.source.tar.xz"
+# TODO: replace with the SHA-256 emitted by repack-source-tarball.sh after
+# the modified tarball has been uploaded to the lookaside cache.
+hash = "REPLACE_WITH_SHA256_FROM_REPACK_SCRIPT"
+hash-type = "SHA256"
+origin = { type = "download", uri = "https://azltempstaginglookaside.blob.core.windows.net/repo/pkgs/firefox/firefox-148.0.azl.source.tar.xz/sha256/REPLACE_WITH_SHA256_FROM_REPACK_SCRIPT/firefox-148.0.azl.source.tar.xz" }
