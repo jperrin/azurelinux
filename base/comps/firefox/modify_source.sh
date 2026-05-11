@@ -26,7 +26,7 @@
 #   * LC_ALL=C  (locale-independent sort)
 #
 # Usage:
-#   repack-source-tarball.sh [--version 148.0] [--workdir DIR] [--keep]
+#   modify_source.sh [--version 148.0] [--workdir DIR] [--keep]
 #
 # Output: <workdir>/firefox-<VERSION>.azl.source.tar.xz  (+ .sha256, .sha512)
 
@@ -35,7 +35,8 @@ set -euo pipefail
 VERSION="148.0"
 KEEP=0
 # Default workdir lives under the project work dir to comply with AGENTS.md.
-WORKDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/base/build/work/scratch/firefox-repack"
+# Convention from Task 19805: base/build/work/scratch/<component>/.
+WORKDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/base/build/work/scratch/firefox"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -119,11 +120,11 @@ Done.
   SHA-512 file:  ${WORKDIR}/${OUTPUT_NAME}.sha512
 
 Next steps:
-  1. Upload to the AZL lookaside cache (sha256 path):
+  1. Upload to the AZL modified-source lookaside (pkgs_modified path, per Task 19805):
        az storage blob upload \\
          --account-name azltempstaginglookaside \\
          --container-name repo \\
-         --name "pkgs/firefox/${OUTPUT_NAME}/sha256/\$(awk '{print \$1}' ${OUTPUT_NAME}.sha256)/${OUTPUT_NAME}" \\
+         --name "pkgs_modified/firefox/${OUTPUT_NAME}/sha256/\$(awk '{print \$1}' ${OUTPUT_NAME}.sha256)/${OUTPUT_NAME}" \\
          --file ${OUTPUT_NAME} \\
          --auth-mode login --overwrite false
   2. Update base/comps/firefox/firefox.comp.toml:
