@@ -49,9 +49,9 @@ replacement = '%global enable_mozilla_crashreporter 0'
 #   3. Upload the new tarball to the modified-source lookaside (see script output).
 [[components.firefox.overlays]]
 description = "Use AZL-repacked source tarball with obfuscated ff-inst.exe removed (RPM signing block)"
-type = "spec-update-tag"
-tag = "Source0"
-value = "https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.azl.source.tar.xz"
+type = "spec-search-replace"
+regex = 'firefox-%\{version\}%\{\?pre_version\}\.source\.tar\.xz'
+replacement = 'firefox-%{version}%{?pre_version}.azl.source.tar.xz'
 
 # Drop the upstream firefox-<version>.source.tar.xz entry from the Fedora
 # `sources` lookaside manifest so the build does not also try to fetch the
@@ -60,11 +60,11 @@ value = "https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_versi
 description = "Remove upstream firefox source tarball SHA512 from sources manifest (replaced by AZL repack)"
 type = "file-search-replace"
 file = "sources"
-regex = '^SHA512 \(firefox-148\.0\.source\.tar\.xz\) = [0-9a-f]+\n?'
+regex = 'SHA512 \(firefox-148\.0\.source\.tar\.xz\) = [0-9a-f]+\n'
 replacement = ''
 
 [[components.firefox.source-files]]
 filename = "firefox-148.0.azl.source.tar.xz"
-hash = "96f8a24b1abebe475c2f67592414b7bf7a672dfee2ed8bb96ea1a411c3aa24bd"
-hash-type = "SHA256"
-origin = { type = "download", uri = "https://azltempstaginglookaside.blob.core.windows.net/repo/pkgs_modified/firefox/firefox-148.0.azl.source.tar.xz/sha256/96f8a24b1abebe475c2f67592414b7bf7a672dfee2ed8bb96ea1a411c3aa24bd/firefox-148.0.azl.source.tar.xz" }
+hash = "f4d7214503e3369925fade636dfe31823dbee3c116915b725f8efe0f0d205f5ea3cd638bd96553b6d30fce553bdc2eee14de817c979522f4f999132655c4a6c5"
+hash-type = "SHA512"
+origin = { type = "download", uri = "https://azltempstaginglookaside.blob.core.windows.net/repo/pkgs_modified/firefox/firefox-148.0.azl.source.tar.xz/sha512/f4d7214503e3369925fade636dfe31823dbee3c116915b725f8efe0f0d205f5ea3cd638bd96553b6d30fce553bdc2eee14de817c979522f4f999132655c4a6c5/firefox-148.0.azl.source.tar.xz" }
