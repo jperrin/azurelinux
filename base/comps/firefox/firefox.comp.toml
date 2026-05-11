@@ -55,8 +55,6 @@ value = "https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_versi
 
 [[components.firefox.source-files]]
 filename = "firefox-148.0.azl.source.tar.xz"
-# TODO: replace with the SHA-256 emitted by repack-source-tarball.sh after
-# the modified tarball has been uploaded to the lookaside cache.
-hash = "REPLACE_WITH_SHA256_FROM_REPACK_SCRIPT"
+hash = "96f8a24b1abebe475c2f67592414b7bf7a672dfee2ed8bb96ea1a411c3aa24bd"
 hash-type = "SHA256"
-origin = { type = "download", uri = "https://azltempstaginglookaside.blob.core.windows.net/repo/pkgs/firefox/firefox-148.0.azl.source.tar.xz/sha256/REPLACE_WITH_SHA256_FROM_REPACK_SCRIPT/firefox-148.0.azl.source.tar.xz" }
+origin = { type = "download", uri = "https://azltempstaginglookaside.blob.core.windows.net/repo/pkgs/firefox/firefox-148.0.azl.source.tar.xz/sha256/96f8a24b1abebe475c2f67592414b7bf7a672dfee2ed8bb96ea1a411c3aa24bd/firefox-148.0.azl.source.tar.xz" }
